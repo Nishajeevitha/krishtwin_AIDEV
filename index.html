@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroMind — Smart Farm Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#060d06; --s1:#0e170e; --s2:#152015; --s3:#1a281a;
+  --b1:#1f301f; --b2:#2a3f2a; --b3:#3a5c3a;
+  --green:#5eea82; --gm:#2dba55; --gd:#134d25;
+  --amber:#fcd34d; --red:#fc6b6b; --blue:#67b8f7; --purple:#c084fc;
+  --t1:#dff5df; --t2:#6a916a; --t3:#334d33;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden;}
+
+/* ── BG ── */
+.bg-orbs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.08;animation:drift 14s ease-in-out infinite alternate;}
+.o1{width:600px;height:600px;background:#22c55e;top:-250px;left:-150px;}
+.o2{width:400px;height:400px;background:#166534;bottom:-150px;right:-100px;animation-delay:-5s;}
+.o3{width:300px;height:300px;background:#1d4ed8;top:40%;right:20%;animation-delay:-9s;opacity:.05;}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(50px,40px)}}
+
+/* ── LAYOUT ── */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh;position:relative;z-index:1;}
+
+/* ── SIDEBAR ── */
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);padding:26px 0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
+.logo{padding:0 22px 28px;display:flex;align-items:center;gap:10px;}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,#166534,#4ade80);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-.5px;}
+.logo-text span{color:var(--green);}
+.nav-sec{padding:0 10px;flex:1;}
+.nav-lbl{font-size:10px;font-weight:500;letter-spacing:2px;color:var(--t3);padding:0 10px 7px;text-transform:uppercase;margin-top:14px;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;cursor:pointer;color:var(--t2);font-size:13px;transition:all .2s;margin-bottom:1px;}
+.nav-item:hover{background:var(--s2);color:var(--t1);}
+.nav-item.active{background:rgba(94,234,130,.1);color:var(--green);}
+.nav-icon{font-size:15px;width:20px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:10px;}
+.sidebar-foot{padding:18px 22px;border-top:1px solid var(--b1);margin-top:auto;}
+.farm-pill{background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:10px 12px;cursor:pointer;}
+.farm-pill-lbl{font-size:10px;color:var(--t3);margin-bottom:2px;}
+.farm-pill-name{font-size:12px;font-weight:500;}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:5px;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* ── MAIN ── */
+.main{padding:28px 30px;display:flex;flex-direction:column;gap:22px;overflow-y:auto;max-height:100vh;}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.page-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.5px;}
+.page-sub{font-size:12px;color:var(--t2);margin-top:3px;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.weather-chip{background:var(--s1);border:1px solid var(--b1);border-radius:20px;padding:7px 14px;display:flex;align-items:center;gap:7px;font-size:12.5px;cursor:pointer;transition:border-color .2s;}
+.weather-chip:hover{border-color:var(--b3);}
+.w-temp{font-weight:600;color:var(--amber);}
+.btn-primary{background:linear-gradient(135deg,var(--gm),var(--green));color:#060d06;border:none;border-radius:8px;padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(94,234,130,.25);}
+
+/* ── STAT CARDS ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.stat{background:var(--s1);border:1px solid var(--b1);border-radius:13px;padding:18px;position:relative;overflow:hidden;transition:border-color .2s;animation:fadeUp .5s both;}
+.stat:hover{border-color:var(--b3);}
+.stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ac,#5eea82),transparent);}
+.stat:nth-child(1){--ac:#5eea82;animation-delay:.05s}
+.stat:nth-child(2){--ac:#67b8f7;animation-delay:.10s}
+.stat:nth-child(3){--ac:#fcd34d;animation-delay:.15s}
+.stat:nth-child(4){--ac:#fc6b6b;animation-delay:.20s}
+.stat-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.stat-lbl{font-size:11.5px;color:var(--t2);}
+.stat-ico{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.ico-g{background:rgba(94,234,130,.12);}
+.ico-b{background:rgba(103,184,247,.12);}
+.ico-a{background:rgba(252,211,77,.12);}
+.ico-r{background:rgba(252,107,107,.12);}
+.stat-val{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:4px;}
+.stat-note{font-size:11px;display:flex;align-items:center;gap:4px;}
+.up{color:var(--green)}.down{color:var(--red)}
+
+/* ── 2-COL GRID ── */
+.grid2{display:grid;grid-template-columns:1fr 330px;gap:20px;}
+.col{display:flex;flex-direction:column;gap:18px;}
+
+/* ── CARD ── */
+.card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:20px;animation:fadeUp .5s both;}
+.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.card-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+.card-sub{font-size:11px;color:var(--t2);margin-top:2px;}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+.bg{background:rgba(94,234,130,.1);color:var(--green);}
+.ba{background:rgba(252,211,77,.1);color:var(--amber);}
+.br{background:rgba(252,107,107,.1);color:var(--red);}
+.bb{background:rgba(103,184,247,.1);color:var(--blue);}
+
+/* ── FIELD MAP ── */
+.field-map{position:relative;height:260px;background:#0a150a;border-radius:10px;overflow:hidden;border:1px solid var(--b1);}
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(94,234,130,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(94,234,130,.04) 1px,transparent 1px);background-size:38px 38px;}
+.zone{position:absolute;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;transition:all .25s;border:2px solid transparent;}
+.zone:hover{border-color:#fff;transform:scale(1.03);z-index:10;}
+.zone-info{text-align:center;line-height:1.4;}
+.zh{background:rgba(94,234,130,.22);color:var(--green);}
+.zw{background:rgba(252,211,77,.22);color:var(--amber);}
+.zc{background:rgba(252,107,107,.22);color:var(--red);}
+.zb{background:rgba(103,184,247,.18);color:var(--blue);}
+.map-legend{position:absolute;bottom:10px;right:10px;background:rgba(6,13,6,.88);border:1px solid var(--b1);border-radius:8px;padding:9px 12px;display:flex;flex-direction:column;gap:4px;}
+.leg-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2);}
+.leg-dot{width:7px;height:7px;border-radius:2px;}
+
+/* ── ZONE TOOLTIP ── */
+.tooltip{position:absolute;background:rgba(6,13,6,.95);border:1px solid var(--b2);border-radius:10px;padding:12px 14px;font-size:12px;pointer-events:none;z-index:20;min-width:160px;display:none;}
+.tooltip.show{display:block;}
+.tt-title{font-weight:600;margin-bottom:6px;font-size:13px;}
+.tt-row{display:flex;justify-content:space-between;gap:16px;color:var(--t2);margin-bottom:3px;}
+.tt-val{color:var(--t1);font-weight:500;}
+
+/* ── CHART ── */
+.chart-wrap{height:130px;display:flex;align-items:flex-end;gap:5px;padding-bottom:20px;position:relative;}
+.bar-group{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;}
+.bars{display:flex;gap:3px;align-items:flex-end;}
+.bar{width:11px;border-radius:3px 3px 0 0;transition:opacity .2s;cursor:pointer;}
+.bar:hover{opacity:.75;}
+.bar-g{background:var(--green);}
+.bar-b{background:var(--blue);}
+.bar-lbl{font-size:10px;color:var(--t3);position:absolute;bottom:0;}
+.chart-x{display:flex;gap:5px;padding-bottom:0;margin-top:4px;}
+.cx{flex:1;text-align:center;font-size:10px;color:var(--t3);}
+.chart-legend{display:flex;gap:14px;margin-top:10px;}
+.cl{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);}
+.cl-dot{width:9px;height:9px;border-radius:2px;}
+
+/* ── CROP TABLE ── */
+.ctable{width:100%;border-collapse:collapse;}
+.ctable th{font-size:10px;color:var(--t3);text-align:left;padding:0 0 10px;font-weight:500;border-bottom:1px solid var(--b1);text-transform:uppercase;letter-spacing:.5px;}
+.ctable td{padding:10px 0;font-size:12.5px;border-bottom:1px solid var(--b1);}
+.ctable tr:last-child td{border:none;}
+.crop-nm{font-weight:500;display:flex;align-items:center;gap:7px;}
+.hbar{display:flex;align-items:center;gap:7px;}
+.htrack{flex:1;height:5px;background:var(--b1);border-radius:3px;overflow:hidden;}
+.hfill{height:100%;border-radius:3px;}
+.hpct{font-size:11px;color:var(--t2);width:28px;text-align:right;}
+
+/* ── ALERTS ── */
+.alerts-list{display:flex;flex-direction:column;gap:9px;}
+.alert{background:var(--s2);border-radius:9px;padding:11px 13px;display:flex;gap:10px;border-left:3px solid var(--b2);cursor:pointer;transition:all .2s;}
+.alert:hover{background:var(--s3);}
+.alert.crit{border-color:var(--red);}
+.alert.warn{border-color:var(--amber);}
+.alert.good{border-color:var(--green);}
+.alert.info{border-color:var(--blue);}
+.a-ico{font-size:17px;flex-shrink:0;margin-top:1px;}
+.a-title{font-size:12.5px;font-weight:500;margin-bottom:2px;}
+.a-desc{font-size:11.5px;color:var(--t2);line-height:1.4;}
+.a-time{font-size:10px;color:var(--t3);margin-top:3px;}
+
+/* ── SOIL METRICS ── */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.metric{background:var(--s2);border-radius:9px;padding:12px;}
+.m-lbl{font-size:10px;color:var(--t2);margin-bottom:6px;}
+.m-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;letter-spacing:-.5px;}
+.m-unit{font-size:11px;color:var(--t2);margin-left:2px;font-family:'DM Sans',sans-serif;}
+.m-bar{height:4px;background:var(--b1);border-radius:2px;margin-top:7px;overflow:hidden;}
+.m-fill{height:100%;border-radius:2px;}
+
+/* ── IRRIGATION ── */
+.irr-list{display:flex;flex-direction:column;gap:7px;}
+.irr-row{display:flex;align-items:center;gap:10px;background:var(--s2);padding:9px 11px;border-radius:8px;}
+.irr-name{font-size:12.5px;font-weight:500;flex:1;}
+.irr-sub{font-size:11px;color:var(--t2);}
+.toggle{width:34px;height:19px;border-radius:10px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle.off{background:var(--b2);}
+.toggle::after{content:'';position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;top:3px;transition:left .2s;}
+.toggle.on::after{left:18px;}
+.toggle.off::after{left:3px;}
+
+/* ── WEATHER PANEL ── */
+.weather-panel{display:none;position:fixed;top:70px;right:24px;background:var(--s1);border:1px solid var(--b2);border-radius:14px;padding:20px;z-index:100;width:300px;animation:fadeUp .3s both;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+.weather-panel.show{display:block;}
+.wp-close{float:right;cursor:pointer;color:var(--t3);font-size:18px;line-height:1;}
+.wp-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:14px;}
+.wp-current{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.wp-ico{font-size:36px;}
+.wp-big-temp{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;}
+.wp-cond{font-size:12px;color:var(--t2);}
+.wp-details{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.wp-detail{background:var(--s2);border-radius:8px;padding:8px 10px;}
+.wp-dlbl{font-size:10px;color:var(--t3);margin-bottom:2px;}
+.wp-dval{font-size:13px;font-weight:500;}
+.wp-forecast{display:flex;gap:6px;}
+.wf-day{flex:1;background:var(--s2);border-radius:8px;padding:7px 5px;text-align:center;}
+.wf-name{font-size:10px;color:var(--t3);margin-bottom:3px;}
+.wf-ico{font-size:16px;margin-bottom:3px;}
+.wf-high{font-size:12px;font-weight:600;}
+.wf-low{font-size:10px;color:var(--t2);}
+.wf-rain{font-size:10px;color:var(--blue);}
+.wp-tips{margin-top:12px;display:flex;flex-direction:column;gap:6px;}
+.wp-tip{background:var(--s2);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--t2);border-left:3px solid var(--b2);}
+.wp-tip.warning{border-color:var(--amber);}
+.wp-tip.good{border-color:var(--green);}
+.wp-tip.info{border-color:var(--blue);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="bg-orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+
+<!-- ZONE TOOLTIP -->
+<div class="tooltip" id="zone-tooltip">
+  <div class="tt-title" id="tt-title">Zone A</div>
+  <div class="tt-row"><span>Crop</span><span class="tt-val" id="tt-crop">—</span></div>
+  <div class="tt-row"><span>Health</span><span class="tt-val" id="tt-health">—</span></div>
+  <div class="tt-row"><span>Moisture</span><span class="tt-val" id="tt-moist">—</span></div>
+  <div class="tt-row"><span>pH</span><span class="tt-val" id="tt-ph">—</span></div>
+  <div class="tt-row"><span>Status</span><span class="tt-val" id="tt-status">—</span></div>
+</div>
+
+<!-- WEATHER PANEL -->
+<div class="weather-panel" id="weather-panel">
+  <div class="wp-close" onclick="toggleWeather()">✕</div>
+  <div class="wp-title">🌤️ Live Weather</div>
+  <div class="wp-current">
+    <div class="wp-ico" id="wp-ico">⛅</div>
+    <div>
+      <div class="wp-big-temp" id="wp-temp">—°C</div>
+      <div class="wp-cond" id="wp-cond">Loading...</div>
+    </div>
+  </div>
+  <div class="wp-details">
+    <div class="wp-detail"><div class="wp-dlbl">Humidity</div><div class="wp-dval" id="wp-hum">—</div></div>
+    <div class="wp-detail"><div class="wp-dlbl">Wind</div><div class="wp-dval" id="wp-wind">—</div></div>
+    <div class="wp-detail"><div class="wp-dlbl">Rainfall</div><div class="wp-dval" id="wp-rain">—</div></div>
+    <div class="wp-detail"><div class="wp-dlbl">Source</div><div class="wp-dval" id="wp-src">—</div></div>
+  </div>
+  <div class="wp-forecast" id="wp-forecast"></div>
+  <div class="wp-tips" id="wp-tips"></div>
+</div>
+
+<div class="layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon">🌱</div>
+      <div class="logo-text">Agro<span>Mind</span></div>
+    </div>
+    <div class="nav-sec">
+      <div class="nav-lbl">Overview</div>
+      <div class="nav-item active"><span class="nav-icon">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="location.href='disease-detector.html'"><span class="nav-icon">🔬</span>Disease Detector</div>
+      <div class="nav-item"><span class="nav-icon">🗺️</span>Field Map</div>
+      <div class="nav-item"><span class="nav-icon">🌾</span>Crops <span class="nav-badge" id="alert-count">3</span></div>
+      <div class="nav-lbl">AI Tools</div>
+      <div class="nav-item" onclick="toggleWeather()"><span class="nav-icon">🌦️</span>Weather AI</div>
+      <div class="nav-item"><span class="nav-icon">📈</span>Yield Forecast</div>
+      <div class="nav-item" onclick="location.href='chatbot.html'"><span class="nav-icon">🤖</span>AI Assistant</div>
+      <div class="nav-lbl">Data</div>
+      <div class="nav-item"><span class="nav-icon">📡</span>Sensors <span id="sensor-status" style="margin-left:auto;font-size:10px;color:var(--green)">●24/25</span></div>
+      <div class="nav-item"><span class="nav-icon">📋</span>Reports</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span>Settings</div>
+    </div>
+    <div class="sidebar-foot">
+      <div class="farm-pill">
+        <div class="farm-pill-lbl">ACTIVE FARM</div>
+        <div class="farm-pill-name" id="farm-name"><span class="live-dot"></span>Loading...</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Farm Dashboard</div>
+        <div class="page-sub" id="page-sub">Loading farm data...</div>
+      </div>
+      <div class="topbar-right">
+        <div class="weather-chip" id="weather-chip" onclick="toggleWeather()">
+          <span id="chip-ico">⛅</span>
+          <span class="w-temp" id="chip-temp">—°C</span>
+          <span id="chip-cond" style="color:var(--t2)">Loading...</span>
+        </div>
+        <button class="btn-primary" onclick="location.href='chatbot.html'" style="background:linear-gradient(135deg,#1d4ed8,#67b8f7)">🤖 AI Chat</button>
+        <button class="btn-primary" onclick="location.href='disease-detector.html'">🔬 Scan Crop</button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-head"><span class="stat-lbl">Overall Crop Health</span><div class="stat-ico ico-g">🌿</div></div>
+        <div class="stat-val" style="color:var(--green)" id="s-health">—</div>
+        <div class="stat-note up">↑ Calculated from sensors</div>
+      </div>
+      <div class="stat">
+        <div class="stat-head"><span class="stat-lbl">Avg Soil Moisture</span><div class="stat-ico ico-b">💧</div></div>
+        <div class="stat-val" style="color:var(--blue)" id="s-moisture">—</div>
+        <div class="stat-note" id="s-moisture-note">Loading...</div>
+      </div>
+      <div class="stat">
+        <div class="stat-head"><span class="stat-lbl">Yield Forecast</span><div class="stat-ico ico-a">🌾</div></div>
+        <div class="stat-val" style="color:var(--amber)" id="s-yield">—</div>
+        <div class="stat-note up" id="s-yield-note">Loading...</div>
+      </div>
+      <div class="stat">
+        <div class="stat-head"><span class="stat-lbl">Active Alerts</span><div class="stat-ico ico-r">⚠️</div></div>
+        <div class="stat-val" style="color:var(--red)" id="s-alerts">—</div>
+        <div class="stat-note down" id="s-alerts-note">Loading...</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="grid2">
+      <div class="col">
+
+        <!-- FIELD MAP -->
+        <div class="card" style="animation-delay:.1s">
+          <div class="card-head">
+            <div><div class="card-title">Field Zone Map</div><div class="card-sub" id="map-sub">Loading zones...</div></div>
+            <span class="badge bg" id="map-badge">● Loading</span>
+          </div>
+          <div class="field-map" id="field-map">
+            <div class="map-grid"></div>
+            <div class="zone zh" style="left:5%;top:8%;width:27%;height:38%" id="z-a"
+              onmouseenter="showTooltip(event,'zone-a')" onmouseleave="hideTooltip()">
+              <div class="zone-info"><div>🌾</div><div>Zone A</div><div id="za-h" style="font-size:10px;opacity:.7">—</div></div>
+            </div>
+            <div class="zone zw" style="left:34%;top:8%;width:28%;height:38%" id="z-b"
+              onmouseenter="showTooltip(event,'zone-b')" onmouseleave="hideTooltip()">
+              <div class="zone-info"><div>🌽</div><div>Zone B</div><div id="zb-h" style="font-size:10px;opacity:.7">—</div></div>
+            </div>
+            <div class="zone zc" style="left:64%;top:8%;width:31%;height:38%" id="z-c"
+              onmouseenter="showTooltip(event,'zone-c')" onmouseleave="hideTooltip()">
+              <div class="zone-info"><div>🍅</div><div>Zone C</div><div id="zc-h" style="font-size:10px;opacity:.7">—</div></div>
+            </div>
+            <div class="zone zh" style="left:5%;top:54%;width:22%;height:38%" id="z-d"
+              onmouseenter="showTooltip(event,'zone-d')" onmouseleave="hideTooltip()">
+              <div class="zone-info"><div>🫑</div><div>Zone D</div><div id="zd-h" style="font-size:10px;opacity:.7">—</div></div>
+            </div>
+            <div class="zone zb" style="left:29%;top:54%;width:20%;height:38%">
+              <div class="zone-info"><div>💧</div><div>Reserve</div><div style="font-size:10px;opacity:.7">Water</div></div>
+            </div>
+            <div class="zone zh" style="left:51%;top:54%;width:44%;height:38%" id="z-e"
+              onmouseenter="showTooltip(event,'zone-e')" onmouseleave="hideTooltip()">
+              <div class="zone-info"><div>🌱</div><div>Zone E</div><div id="ze-h" style="font-size:10px;opacity:.7">—</div></div>
+            </div>
+            <div class="map-legend">
+              <div class="leg-row"><div class="leg-dot" style="background:var(--green)"></div>Healthy</div>
+              <div class="leg-row"><div class="leg-dot" style="background:var(--amber)"></div>Warning</div>
+              <div class="leg-row"><div class="leg-dot" style="background:var(--red)"></div>Critical</div>
+              <div class="leg-row"><div class="leg-dot" style="background:var(--blue)"></div>Water</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- YIELD CHART -->
+        <div class="card" style="animation-delay:.15s">
+          <div class="card-head">
+            <div><div class="card-title">Monthly Yield vs Water Usage</div><div class="card-sub">Last 8 months</div></div>
+            <span class="badge bb">Tonnes · kL</span>
+          </div>
+          <div class="chart-wrap" id="chart-wrap"></div>
+          <div class="chart-x" id="chart-x"></div>
+          <div class="chart-legend">
+            <div class="cl"><div class="cl-dot" style="background:var(--green)"></div>Yield (T)</div>
+            <div class="cl"><div class="cl-dot" style="background:var(--blue)"></div>Water (100L)</div>
+          </div>
+        </div>
+
+        <!-- CROP TABLE -->
+        <div class="card" style="animation-delay:.2s">
+          <div class="card-head">
+            <div class="card-title">Crop Status Overview</div>
+            <span class="badge ba" id="crop-count-badge">— crops</span>
+          </div>
+          <table class="ctable">
+            <thead><tr>
+              <th>Crop</th><th>Zone</th><th>Stage</th><th>Health</th><th>Harvest</th><th>Status</th>
+            </tr></thead>
+            <tbody id="crop-tbody"></tbody>
+          </table>
+        </div>
+
+      </div><!-- /col -->
+
+      <!-- RIGHT PANEL -->
+      <div class="col">
+
+        <!-- AI ALERTS -->
+        <div class="card" style="animation-delay:.1s">
+          <div class="card-head">
+            <div><div class="card-title">AI Alerts</div><div class="card-sub">Live sensor monitoring</div></div>
+            <span class="badge br" id="alert-badge" style="animation:blink 2s infinite">— Active</span>
+          </div>
+          <div class="alerts-list" id="alerts-list"></div>
+        </div>
+
+        <!-- SOIL METRICS -->
+        <div class="card" style="animation-delay:.15s">
+          <div class="card-head">
+            <div class="card-title">Soil Metrics — Zone A</div>
+            <span class="badge bb">Live</span>
+          </div>
+          <div class="metrics">
+            <div class="metric"><div class="m-lbl">pH Level</div><div class="m-val" id="m-ph">—<span class="m-unit">pH</span></div><div class="m-bar"><div class="m-fill" id="m-ph-f" style="background:var(--green)"></div></div></div>
+            <div class="metric"><div class="m-lbl">Nitrogen</div><div class="m-val" id="m-n">—<span class="m-unit">mg/kg</span></div><div class="m-bar"><div class="m-fill" id="m-n-f" style="background:var(--amber)"></div></div></div>
+            <div class="metric"><div class="m-lbl">Phosphorus</div><div class="m-val" id="m-p">—<span class="m-unit">mg/kg</span></div><div class="m-bar"><div class="m-fill" id="m-p-f" style="background:var(--blue)"></div></div></div>
+            <div class="metric"><div class="m-lbl">Soil Temp</div><div class="m-val" id="m-t">—<span class="m-unit">°C</span></div><div class="m-bar"><div class="m-fill" id="m-t-f" style="background:var(--red)"></div></div></div>
+          </div>
+        </div>
+
+        <!-- IRRIGATION -->
+        <div class="card" style="animation-delay:.2s">
+          <div class="card-head">
+            <div class="card-title">Irrigation Control</div>
+            <span class="badge bg">Auto Mode</span>
+          </div>
+          <div class="irr-list" id="irr-list"></div>
+        </div>
+
+        <!-- QUICK LINKS -->
+        <div class="card" style="animation-delay:.25s;background:rgba(94,234,130,.04);border-color:rgba(94,234,130,.15)">
+          <div class="card-title" style="margin-bottom:12px">🚀 Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn-primary" style="width:100%;padding:10px" onclick="location.href='disease-detector.html'">🔬 Scan Crop for Disease</button>
+            <button class="btn-primary" style="width:100%;padding:10px;background:linear-gradient(135deg,#1d4ed8,#67b8f7)" onclick="location.href='chatbot.html'">🤖 Open AI Farm Assistant</button>
+            <button style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer" onclick="refreshData()">🔄 Refresh Sensor Data</button>
+            <button style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--b2);color:var(--t1);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer" onclick="toggleWeather()">🌤️ View Weather Forecast</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Scripts -->
+<script src="api/sensors.js"></script>
+<script src="api/weather.js"></script>
+<script>
+let farmData = null;
+let weatherData = null;
+
+// ── INIT ──────────────────────────────────────────
+async function init() {
+  await loadFarmData();
+  await loadWeather();
+  renderAll();
+  // Live sensor updates every 5 seconds
+  setInterval(() => {
+    if (farmData) {
+      farmData = SensorSimulator.getFullUpdate(farmData);
+      updateLiveMetrics();
+    }
+  }, 5000);
+}
+
+async function loadFarmData() {
+  try {
+    farmData = await SensorSimulator.init();
+    if (!farmData) throw new Error("No data");
+  } catch(e) {
+    // Fallback: embedded minimal data
+    farmData = await fetch('./data/farm-data.json').then(r=>r.json()).catch(()=>null);
+  }
+}
+
+async function loadWeather() {
+  try {
+    weatherData = await WeatherAPI.fetchWeather();
+  } catch(e) {
+    weatherData = WeatherAPI.getFallbackData();
+  }
+}
+
+// ── RENDER ALL ────────────────────────────────────
+function renderAll() {
+  if (!farmData) return;
+  updateTopbar();
+  updateStats();
+  updateZoneMap();
+  updateChart();
+  updateCropTable();
+  updateAlerts();
+  updateSoilMetrics();
+  updateIrrigation();
+  renderWeatherChip();
+}
+
+function updateTopbar() {
+  const f = farmData.farm;
+  document.getElementById('farm-name').innerHTML = `<span class="live-dot"></span>${f.name} — ${f.totalAcres} acres`;
+  document.getElementById('page-sub').textContent =
+    `${f.location} · Last synced ${new Date().toLocaleTimeString()}`;
+  document.getElementById('map-sub').textContent =
+    `${farmData.zones.length} zones · ${farmData.farm.totalAcres} total acres · AI-monitored`;
+  document.getElementById('map-badge').textContent = '● Live';
+  document.getElementById('crop-count-badge').textContent = `${farmData.zones.length} crops active`;
+}
+
+function updateStats() {
+  const s = farmData.farmStats;
+  document.getElementById('s-health').textContent = s.overallHealth + '%';
+  document.getElementById('s-moisture').textContent = s.avgSoilMoisture + '%';
+  document.getElementById('s-moisture-note').textContent =
+    s.avgSoilMoisture < 35 ? '↓ Below threshold' : '↑ Within range';
+  document.getElementById('s-moisture-note').className = 'stat-note ' + (s.avgSoilMoisture < 35 ? 'down' : 'up');
+  document.getElementById('s-yield').textContent = s.yieldForecastTonnes + 'T';
+  document.getElementById('s-yield-note').textContent = `↑ ${s.yieldChangePercent}% above average`;
+  document.getElementById('s-alerts').textContent = s.activeAlerts;
+  document.getElementById('s-alerts-note').textContent = `${s.criticalAlerts} critical · ${s.activeAlerts - s.criticalAlerts} warnings`;
+  document.getElementById('alert-count').textContent = s.activeAlerts;
+  document.getElementById('alert-badge').textContent = s.activeAlerts + ' Active';
+}
+
+function updateZoneMap() {
+  const zones = farmData.zones;
+  const labels = {
+    'zone-a': ['za-h', 'z-a'],
+    'zone-b': ['zb-h', 'z-b'],
+    'zone-c': ['zc-h', 'z-c'],
+    'zone-d': ['zd-h', 'z-d'],
+    'zone-e': ['ze-h', 'z-e']
+  };
+  zones.forEach(z => {
+    const ids = labels[z.id]; if (!ids) return;
+    const [lblId, zoneId] = ids;
+    const el = document.getElementById(lblId);
+    const zone = document.getElementById(zoneId);
+    if (el) el.textContent = `${z.crop} · ${z.healthScore}%`;
+    if (zone) {
+      zone.className = 'zone ' + (z.status === 'healthy' ? 'zh' : z.status === 'warning' ? 'zw' : 'zc');
+    }
+  });
+}
+
+function updateChart() {
+  const hist = farmData.yieldHistory;
+  const maxY = Math.max(...hist.map(d => d.yield));
+  const maxW = Math.max(...hist.map(d => d.water));
+  const h = 110;
+
+  const wrap = document.getElementById('chart-wrap');
+  const xAxis = document.getElementById('chart-x');
+  wrap.innerHTML = '';
+  xAxis.innerHTML = '';
+
+  hist.forEach(d => {
+    const yH = Math.round((d.yield / maxY) * h);
+    const wH = Math.round(((d.water/100) / (maxW/100)) * (h * 0.7));
+    const bg = document.createElement('div');
+    bg.className = 'bar-group';
+    bg.innerHTML = `<div class="bars"><div class="bar bar-g" style="height:${yH}px" title="${d.yield}T"></div><div class="bar bar-b" style="height:${wH}px" title="${d.water}L"></div></div>`;
+    wrap.appendChild(bg);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'cx';
+    lbl.textContent = d.month;
+    xAxis.appendChild(lbl);
+  });
+}
+
+function updateCropTable() {
+  const tbody = document.getElementById('crop-tbody');
+  tbody.innerHTML = '';
+  const emojis = { Wheat:'🌾', Corn:'🌽', Tomato:'🍅', Pepper:'🫑', Seedlings:'🌱' };
+  const statusMap = {
+    healthy: '<span class="badge bg">Healthy</span>',
+    warning: '<span class="badge ba">Watch</span>',
+    critical: '<span class="badge br">Critical</span>'
+  };
+
+  farmData.zones.forEach(z => {
+    const color = z.healthScore > 80 ? '#5eea82' : z.healthScore > 60 ? '#fcd34d' : '#fc6b6b';
+    const harvestDate = new Date(z.expectedHarvest).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    tbody.innerHTML += `
+      <tr>
+        <td><div class="crop-nm">${emojis[z.crop]||'🌿'} ${z.crop}</div></td>
+        <td style="color:var(--t2)">${z.name}</td>
+        <td style="color:var(--t2)">${z.growthStage}</td>
+        <td><div class="hbar"><div class="htrack"><div class="hfill" style="width:${z.healthScore}%;background:${color}"></div></div><span class="hpct">${z.healthScore}%</span></div></td>
+        <td style="color:var(--t2)">${harvestDate}</td>
+        <td>${statusMap[z.status]||''}</td>
+      </tr>`;
+  });
+}
+
+function updateAlerts() {
+  const list = document.getElementById('alerts-list');
+  list.innerHTML = '';
+  const icons = { critical:'🚨', warning:'⚠️', good:'✅', info:'💡' };
+  const cls = { critical:'crit', warning:'warn', good:'good', info:'info' };
+
+  farmData.alerts.forEach(a => {
+    const t = new Date(a.timestamp);
+    const ago = timeSince(t);
+    list.innerHTML += `
+      <div class="alert ${cls[a.type]||'info'}">
+        <div class="a-ico">${icons[a.type]||'💡'}</div>
+        <div>
+          <div class="a-title">${a.title} — ${a.zone}</div>
+          <div class="a-desc">${a.message}</div>
+          <div class="a-time">${ago} · ${a.confidence ? 'AI Confidence: '+a.confidence+'%' : ''}</div>
+        </div>
+      </div>`;
+  });
+}
+
+function updateSoilMetrics() {
+  const zoneA = farmData.zones.find(z => z.id === 'zone-a');
+  if (!zoneA) return;
+  const s = zoneA.sensors;
+
+  setText('m-ph', s.soilPH);
+  setText('m-n', s.nitrogen);
+  setText('m-p', s.phosphorus);
+  setText('m-t', s.soilTemp);
+
+  setBar('m-ph-f', ((s.soilPH - 5) / 3) * 100);
+  setBar('m-n-f', (s.nitrogen / 60) * 100);
+  setBar('m-p-f', (s.phosphorus / 50) * 100);
+  setBar('m-t-f', (s.soilTemp / 35) * 100);
+}
+
+function updateIrrigation() {
+  const list = document.getElementById('irr-list');
+  list.innerHTML = '';
+  farmData.zones.slice(0,4).forEach(z => {
+    const isOn = z.irrigation.status === 'running' || z.irrigation.autoMode;
+    const subColor = z.irrigation.status === 'running' ? 'color:var(--blue)' : '';
+    const subText = z.irrigation.status === 'running'
+      ? `● Running · ${z.irrigation.waterAmount}L/hr`
+      : `${z.irrigation.nextCycle} · ${z.irrigation.waterAmount}L`;
+    list.innerHTML += `
+      <div class="irr-row">
+        <div><div class="irr-name">${z.name} — ${z.crop}</div><div class="irr-sub" style="${subColor}">${subText}</div></div>
+        <div class="toggle ${isOn?'on':'off'}" onclick="this.classList.toggle('on');this.classList.toggle('off')"></div>
+      </div>`;
+  });
+}
+
+// ── WEATHER ───────────────────────────────────────
+function renderWeatherChip() {
+  if (!weatherData) return;
+  const c = weatherData.current;
+  document.getElementById('chip-ico').textContent = c.icon;
+  document.getElementById('chip-temp').textContent = c.temp + '°C';
+  document.getElementById('chip-cond').textContent = c.condition + ' · ' + c.humidity + '% humidity';
+}
+
+function toggleWeather() {
+  const p = document.getElementById('weather-panel');
+  p.classList.toggle('show');
+  if (p.classList.contains('show') && weatherData) renderWeatherPanel();
+}
+
+function renderWeatherPanel() {
+  const w = weatherData;
+  const c = w.current;
+  document.getElementById('wp-ico').textContent = c.icon;
+  document.getElementById('wp-temp').textContent = c.temp + '°C';
+  document.getElementById('wp-cond').textContent = c.condition + ' · ' + w.city;
+  document.getElementById('wp-hum').textContent = c.humidity + '%';
+  document.getElementById('wp-wind').textContent = c.windSpeed + ' km/h';
+  document.getElementById('wp-rain').textContent = c.rainfall + ' mm';
+  document.getElementById('wp-src').textContent = w.source === 'live' ? '🟢 Live' : '🟡 Offline';
+
+  const fc = document.getElementById('wp-forecast');
+  fc.innerHTML = '';
+  (w.forecast || []).slice(0,7).forEach(d => {
+    fc.innerHTML += `<div class="wf-day">
+      <div class="wf-name">${d.day}</div>
+      <div class="wf-ico">${d.icon}</div>
+      <div class="wf-high">${d.high}°</div>
+      <div class="wf-low">${d.low}°</div>
+      <div class="wf-rain">${d.rain}%</div>
+    </div>`;
+  });
+
+  const tips = document.getElementById('wp-tips');
+  tips.innerHTML = '';
+  (w.advice || []).forEach(tip => {
+    tips.innerHTML += `<div class="wp-tip ${tip.type}">${tip.msg}</div>`;
+  });
+}
+
+// ── LIVE UPDATE ───────────────────────────────────
+function updateLiveMetrics() {
+  updateSoilMetrics();
+  updateZoneMap();
+  document.getElementById('page-sub').textContent =
+    `${farmData.farm.location} · Last synced ${new Date().toLocaleTimeString()}`;
+}
+
+function refreshData() {
+  if (farmData) {
+    farmData = SensorSimulator.getFullUpdate(farmData);
+    renderAll();
+  }
+}
+
+// ── TOOLTIP ───────────────────────────────────────
+function showTooltip(e, zoneId) {
+  if (!farmData) return;
+  const zone = farmData.zones.find(z => z.id === zoneId);
+  if (!zone) return;
+  const tt = document.getElementById('zone-tooltip');
+  document.getElementById('tt-title').textContent = `${zone.name} — ${zone.crop}`;
+  document.getElementById('tt-crop').textContent = zone.crop;
+  document.getElementById('tt-health').textContent = zone.healthScore + '%';
+  document.getElementById('tt-moist').textContent = zone.sensors.soilMoisture + '%';
+  document.getElementById('tt-ph').textContent = zone.sensors.soilPH;
+  document.getElementById('tt-status').textContent = zone.status.charAt(0).toUpperCase() + zone.status.slice(1);
+  tt.style.left = (e.pageX + 12) + 'px';
+  tt.style.top  = (e.pageY - 80) + 'px';
+  tt.classList.add('show');
+}
+
+function hideTooltip() {
+  document.getElementById('zone-tooltip').classList.remove('show');
+}
+
+// ── HELPERS ───────────────────────────────────────
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.childNodes[0].textContent = val;
+}
+
+function setBar(id, pct) {
+  const el = document.getElementById(id);
+  if (el) el.style.width = Math.min(100, Math.max(0, pct)) + '%';
+}
+
+function timeSince(date) {
+  const sec = Math.floor((new Date() - date) / 1000);
+  if (sec < 60) return sec + ' sec ago';
+  if (sec < 3600) return Math.floor(sec/60) + ' min ago';
+  return Math.floor(sec/3600) + ' hr ago';
+}
+
+// ── BOOT ──────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
