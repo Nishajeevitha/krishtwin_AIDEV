@@ -1,0 +1,237 @@
+{
+  "farm": {
+    "name": "Green Valley Farm",
+    "owner": "Rajesh Kumar",
+    "location": "Pune, Maharashtra",
+    "totalAcres": 240,
+    "lastUpdated": "2026-03-03T08:30:00Z"
+  },
+
+  "zones": [
+    {
+      "id": "zone-a",
+      "name": "Zone A",
+      "crop": "Wheat",
+      "acres": 50,
+      "healthScore": 92,
+      "status": "healthy",
+      "growthStage": "Heading",
+      "sowingDate": "2025-11-10",
+      "expectedHarvest": "2026-04-14",
+      "sensors": {
+        "soilMoisture": 58,
+        "soilPH": 6.4,
+        "nitrogen": 42,
+        "phosphorus": 28,
+        "potassium": 35,
+        "soilTemp": 22,
+        "airTemp": 28,
+        "humidity": 62
+      },
+      "irrigation": {
+        "status": "scheduled",
+        "nextCycle": "06:00 AM",
+        "waterAmount": 320,
+        "autoMode": true
+      }
+    },
+    {
+      "id": "zone-b",
+      "name": "Zone B",
+      "crop": "Corn",
+      "acres": 60,
+      "healthScore": 71,
+      "status": "warning",
+      "growthStage": "Tasseling",
+      "sowingDate": "2025-12-01",
+      "expectedHarvest": "2026-05-02",
+      "sensors": {
+        "soilMoisture": 28,
+        "soilPH": 6.1,
+        "nitrogen": 31,
+        "phosphorus": 18,
+        "potassium": 29,
+        "soilTemp": 25,
+        "airTemp": 30,
+        "humidity": 55
+      },
+      "irrigation": {
+        "status": "running",
+        "nextCycle": "Now",
+        "waterAmount": 180,
+        "autoMode": true
+      }
+    },
+    {
+      "id": "zone-c",
+      "name": "Zone C",
+      "crop": "Tomato",
+      "acres": 40,
+      "healthScore": 48,
+      "status": "critical",
+      "growthStage": "Flowering",
+      "sowingDate": "2025-12-15",
+      "expectedHarvest": "2026-05-20",
+      "sensors": {
+        "soilMoisture": 35,
+        "soilPH": 5.8,
+        "nitrogen": 25,
+        "phosphorus": 14,
+        "potassium": 20,
+        "soilTemp": 27,
+        "airTemp": 32,
+        "humidity": 48
+      },
+      "irrigation": {
+        "status": "scheduled",
+        "nextCycle": "04:00 PM",
+        "waterAmount": 200,
+        "autoMode": true
+      }
+    },
+    {
+      "id": "zone-d",
+      "name": "Zone D",
+      "crop": "Pepper",
+      "acres": 35,
+      "healthScore": 88,
+      "status": "healthy",
+      "growthStage": "Mature",
+      "sowingDate": "2025-10-20",
+      "expectedHarvest": "2026-03-18",
+      "sensors": {
+        "soilMoisture": 62,
+        "soilPH": 6.6,
+        "nitrogen": 44,
+        "phosphorus": 30,
+        "potassium": 38,
+        "soilTemp": 21,
+        "airTemp": 27,
+        "humidity": 65
+      },
+      "irrigation": {
+        "status": "paused",
+        "nextCycle": "Tomorrow 6AM",
+        "waterAmount": 150,
+        "autoMode": false
+      }
+    },
+    {
+      "id": "zone-e",
+      "name": "Zone E",
+      "crop": "Seedlings",
+      "acres": 30,
+      "healthScore": 95,
+      "status": "healthy",
+      "growthStage": "Germination",
+      "sowingDate": "2026-02-20",
+      "expectedHarvest": "2026-06-10",
+      "sensors": {
+        "soilMoisture": 70,
+        "soilPH": 6.5,
+        "nitrogen": 38,
+        "phosphorus": 25,
+        "potassium": 32,
+        "soilTemp": 24,
+        "airTemp": 26,
+        "humidity": 70
+      },
+      "irrigation": {
+        "status": "scheduled",
+        "nextCycle": "07:00 AM",
+        "waterAmount": 100,
+        "autoMode": true
+      }
+    }
+  ],
+
+  "alerts": [
+    {
+      "id": "alert-1",
+      "type": "critical",
+      "zone": "Zone C",
+      "crop": "Tomato",
+      "title": "Leaf Blight Detected",
+      "message": "AI identified early-stage fungal infection. Recommend fungicide spray within 24h.",
+      "confidence": 94,
+      "timestamp": "2026-03-03T08:15:00Z",
+      "resolved": false
+    },
+    {
+      "id": "alert-2",
+      "type": "critical",
+      "zone": "Zone B",
+      "crop": "Corn",
+      "title": "Soil Moisture Low",
+      "message": "Moisture at 28% — below 35% threshold. Auto-irrigation triggered.",
+      "confidence": 99,
+      "timestamp": "2026-03-03T08:00:00Z",
+      "resolved": false
+    },
+    {
+      "id": "alert-3",
+      "type": "warning",
+      "zone": "Zone B, Zone C",
+      "crop": "Corn, Tomato",
+      "title": "Heat Stress Risk",
+      "message": "Forecast 36°C tomorrow. Consider shade netting.",
+      "confidence": 82,
+      "timestamp": "2026-03-03T07:00:00Z",
+      "resolved": false
+    },
+    {
+      "id": "alert-4",
+      "type": "good",
+      "zone": "Zone A",
+      "crop": "Wheat",
+      "title": "Yield Ahead of Schedule",
+      "message": "Zone A performing 12% above last season. Harvest window: Apr 12–16.",
+      "confidence": 88,
+      "timestamp": "2026-03-03T06:00:00Z",
+      "resolved": false
+    }
+  ],
+
+  "yieldHistory": [
+    { "month": "Jul", "yield": 2.8, "water": 420, "rainfall": 80 },
+    { "month": "Aug", "yield": 3.2, "water": 380, "rainfall": 120 },
+    { "month": "Sep", "yield": 2.9, "water": 400, "rainfall": 60 },
+    { "month": "Oct", "yield": 3.8, "water": 350, "rainfall": 40 },
+    { "month": "Nov", "yield": 3.1, "water": 420, "rainfall": 20 },
+    { "month": "Dec", "yield": 4.0, "water": 310, "rainfall": 10 },
+    { "month": "Jan", "yield": 3.9, "water": 290, "rainfall": 15 },
+    { "month": "Feb", "yield": 4.2, "water": 270, "rainfall": 25 }
+  ],
+
+  "weather": {
+    "current": {
+      "temp": 28,
+      "humidity": 62,
+      "condition": "Partly Cloudy",
+      "windSpeed": 12,
+      "rainfall": 0
+    },
+    "forecast": [
+      { "day": "Today",  "high": 30, "low": 18, "condition": "Sunny",        "rain": 0  },
+      { "day": "Tue",    "high": 33, "low": 20, "condition": "Partly Cloudy","rain": 5  },
+      { "day": "Wed",    "high": 36, "low": 22, "condition": "Hot",          "rain": 0  },
+      { "day": "Thu",    "high": 29, "low": 19, "condition": "Thunderstorm", "rain": 85 },
+      { "day": "Fri",    "high": 25, "low": 17, "condition": "Rainy",        "rain": 70 },
+      { "day": "Sat",    "high": 27, "low": 18, "condition": "Cloudy",       "rain": 20 },
+      { "day": "Sun",    "high": 31, "low": 19, "condition": "Sunny",        "rain": 0  }
+    ]
+  },
+
+  "farmStats": {
+    "overallHealth": 87,
+    "avgSoilMoisture": 42,
+    "yieldForecastTonnes": 4.2,
+    "yieldChangePercent": 12,
+    "activeAlerts": 3,
+    "criticalAlerts": 2,
+    "waterUsedThisMonth": 1840,
+    "waterSavedPercent": 23,
+    "activeSensors": 24,
+    "totalSensors": 25
+  }
+}
